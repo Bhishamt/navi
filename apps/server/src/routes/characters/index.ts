@@ -6,6 +6,7 @@ import { safeParse } from 'valibot'
 
 import { authGuard } from '../../middlewares/auth'
 import { createBadRequestError, createForbiddenError, createNotFoundError } from '../../utils/error'
+import * as schema from '../../schemas/characters'
 import { CreateCharacterSchema, UpdateCharacterSchema } from './schema'
 
 export function createCharacterRoutes(characterService: CharacterService) {
@@ -41,14 +42,13 @@ export function createCharacterRoutes(characterService: CharacterService) {
         throw createBadRequestError('Invalid Request', 'INVALID_REQUEST', result.issues)
       }
 
-      // @ts-expect-error - TODO: Fix this
       const character = await characterService.create({
         ...result.output,
         character: {
           ...result.output.character,
           ownerId: user.id,
           creatorId: user.id,
-        },
+        } as schema.NewCharacter,
       })
 
       return c.json(character, 201)
