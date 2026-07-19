@@ -147,6 +147,23 @@ describe('characterRoutes', () => {
     expect(res.status).toBe(403)
   })
 
+  it('delete /:id should return 403 if not owner', async () => {
+    const [otherUser] = await db.insert(schema.user).values({
+      id: 'user-3',
+      name: 'Other User 2',
+      email: 'other2@example.com',
+    }).returning()
+
+    const characters = await characterService.findAll()
+    const charId = characters[0].id
+
+    const res = await app.fetch(new Request(`http://localhost/${charId}`, {
+      method: 'DELETE',
+    }), { user: otherUser } as any)
+
+    expect(res.status).toBe(403)
+  })
+
   it('delete /:id should soft delete', async () => {
     const characters = await characterService.findAll()
     const charId = characters[0].id
